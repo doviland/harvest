@@ -1,0 +1,85 @@
+# GitHub Pages Configuration
+# Harvest Time Tracking Analyzer v2.0
+
+# Site settings
+title: "Harvest Time Tracking Analyzer"
+description: "Analizza e categorizza automaticamente i costi dai file Excel di Harvest Time Tracking"
+baseurl: ""
+url: "https://tuousername.github.io"
+
+# Author information  
+author:
+  name: "Harvest Analyzer Team"
+  email: "support@harvestanalyzer.com"
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+theme: minima
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Exclude files from processing
+exclude:
+  - node_modules/
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - package.json
+  - package-lock.json
+  - vendor/
+
+# Include files  
+include:
+  - .htaccess
+  - _pages
+
+# Collections
+collections:
+  pages:
+    output: true
+    permalink: /:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# SEO
+lang: it_IT
+locale: it_IT
+
+# Social
+github:
+  repository_name: harvest-analyzer
+  repository_url: https://github.com/tuousername/harvest-analyzer
+
+# Custom variables
+app:
+  name: "Harvest Time Tracking Analyzer"  
+  version: "2.0.0"
+  description: "Categorizzazione automatica costi per tipologia"
+  
+# Timezone
+timezone: Europe/Rome
+
+# GitHub Pages specific
+lsi: false
+safe: true
+source: .
+incremental: false
+highlighter: rouge
+gist:
+  noscript: false
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge
