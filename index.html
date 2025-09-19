@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Harvest Time Tracking Analyzer - Analizza e categorizza automaticamente i costi dai file Excel di Harvest Time Tracking">
+    <meta name="keywords" content="harvest, time tracking, analisi costi, excel, categorizzazione, reporting">
+    <meta name="author" content="Harvest Analyzer Team">
+    
+    <title>Harvest Time Tracking Analyzer | Categorizzazione Automatica Costi</title>
+    
+    <!-- Favicon SVG inline per evitare file esterni -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%233b82f6'/%3E%3Cpath d='M16 8c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z' fill='%23fff'/%3E%3Cpath d='M17 12h-2v4l3 1.8.6-1L17 15v-3z' fill='%23fff'/%3E%3C/svg%3E">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#3b82f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Harvest Analyzer">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tuousername.github.io/harvest-analyzer/">
+    <meta property="og:title" content="Harvest Time Tracking Analyzer">
+    <meta property="og:description" content="Analizza e categorizza automaticamente i costi dai file Excel di Harvest Time Tracking">
+    <meta property="og:image" content="https://via.placeholder.com/1200x630/3b82f6/ffffff?text=Harvest+Analyzer">
+    
+    <!-- CDN Libraries - Versioni stabili -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'harvest': {
+                            'primary': '#3b82f6',
+                            'digital': '#ef4444',
+                            'operational': '#f97316',
+                            'general': '#6b7280',
+                            'billable': '#10b981'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 font-inter antialiased">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4 md:py-6">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-harvest-primary text-white rounded-lg p-2">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">Harvest Time Analyzer</h1>
+                        <p class="text-sm text-gray-600 hidden md:block">Categorizzazione automatica costi per tipologia</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 text-sm text-gray-500">
+                    <i class="fas fa-shield-alt"></i>
+                    <span class="hidden md:inline">Privacy-First • v2.0</span>
+                    <span class="md:hidden">v2.0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        
+        <!-- Upload Section -->
+        <section id="uploadSection" class="mb-8">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 md:p-8">
+                    <div class="text-center mb-6">
+                        <div class="mx-auto w-16 h-16 bg-harvest-primary/10 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-file-excel text-harvest-primary text-2xl"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Carica il file Excel di Harvest</h2>
+                        <p class="text-gray-600 max-w-2xl mx-auto">
+                            Trascina qui il file o clicca per selezionarlo. L'analisi avviene completamente nel tuo browser per garantire la privacy dei dati.
+                        </p>
+                    </div>
+                    
+                    <!-- Drop Zone -->
+                    <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:border-harvest-primary hover:bg-blue-50">
+                        <div class="upload-content">
+                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                            <p class="text-lg font-medium text-gray-700 mb-2">Trascina qui il file Excel</p>
+                            <p class="text-gray-500 mb-4">oppure clicca per selezionarlo</p>
+                            <div class="text-xs text-gray-400 space-y-1">
+                                <div class="flex items-center justify-center space-x-4 flex-wrap">
+                                    <span><i class="fas fa-check text-green-500 mr-1"></i> .xlsx, .xls</span>
+                                    <span><i class="fas fa-check text-green-500 mr-1"></i> Max 10MB</span>
+                                    <span><i class="fas fa-check text-green-500 mr-1"></i> Privacy-safe</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Loading State -->
+                        <div id="loadingState" class="hidden">
+                            <div class="flex flex-col items-center">
+                                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-harvest-primary mb-4"></div>
+                                <p class="text-harvest-primary font-medium">Elaborazione in corso...</p>
+                                <p class="text-sm text-gray-500">Analisi dei dati Excel</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden" aria-label="Seleziona file Excel">
+                    
+                    <!-- File Info -->
+                    <div id="fileInfo" class="hidden mt-4 p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-file-excel text-harvest-primary text-xl"></i>
+                                <div>
+                                    <p id="fileName" class="font-medium text-gray-900"></p>
+                                    <p id="fileSize" class="text-sm text-gray-600"></p>
+                                </div>
+                            </div>
+                            <button id="removeFile" class="text-gray-400 hover:text-red-500 transition-colors">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden space-y-8">
+            
+            <!-- Overview Cards -->
+            <section>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-chart-pie text-harvest-primary mr-3"></i>
+                    Distribuzione Costi per Tipologia
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Digital Costs -->
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white transform transition-transform hover:scale-105">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">Costi Digital</h3>
+                                <p class="text-xs opacity-90 mb-3">Gestione, controlli, attività digital</p>
+                                <p id="digitalHours" class="text-2xl md:text-3xl font-bold">0h</p>
+                                <p id="digitalPerc" class="text-sm opacity-90">0%</p>
+                            </div>
+                            <i class="fas fa-laptop-code text-3xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Operational Costs -->
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white transform transition-transform hover:scale-105">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">Costi Operativi</h3>
+                                <p class="text-xs opacity-90 mb-3">Riunioni, comunicazioni, Harvest</p>
+                                <p id="operationalHours" class="text-2xl md:text-3xl font-bold">0h</p>
+                                <p id="operationalPerc" class="text-sm opacity-90">0%</p>
+                            </div>
+                            <i class="fas fa-cogs text-3xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- General Costs -->
+                    <div class="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white transform transition-transform hover:scale-105">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">Costi Generali</h3>
+                                <p class="text-xs opacity-90 mb-3">Formazione, amministrazione</p>
+                                <p id="generalHours" class="text-2xl md:text-3xl font-bold">0h</p>
+                                <p id="generalPerc" class="text-sm opacity-90">0%</p>
+                            </div>
+                            <i class="fas fa-briefcase text-3xl opacity-80"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Billable Clients -->
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform transition-transform hover:scale-105">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h3 class="font-semibold mb-1">Clienti Fatturabili</h3>
+                                <p class="text-xs opacity-90 mb-3">Lavoro diretto per clienti</p>
+                                <p id="billableHours" class="text-2xl md:text-3xl font-bold">0h</p>
+                                <p id="billablePerc" class="text-sm opacity-90">0%</p>
+                            </div>
+                            <i class="fas fa-users text-3xl opacity-80"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Cost Distribution Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-chart-pie text-harvest-primary mr-2"></i>
+                        Distribuzione Percentuale
+                    </h3>
+                    <div class="relative" style="height: 350px;">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Top Clients Chart -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <i class="fas fa-chart-bar text-green-600 mr-2"></i>
+                        Top 10 Clienti per Ore
+                    </h3>
+                    <div class="relative" style="height: 350px;">
+                        <canvas id="clientChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summary Stats -->
+            <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-harvest-primary mr-2"></i>
+                    Statistiche Generali del Periodo
+                </h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="text-center">
+                        <div class="bg-blue-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-clock text-harvest-primary"></i>
+                        </div>
+                        <p id="totalHours" class="text-2xl font-bold text-harvest-primary">0h</p>
+                        <p class="text-sm text-gray-600">Ore Totali</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-green-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-users text-green-600"></i>
+                        </div>
+                        <p id="totalClients" class="text-2xl font-bold text-green-600">0</p>
+                        <p class="text-sm text-gray-600">Clienti Unici</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-orange-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-tasks text-orange-600"></i>
+                        </div>
+                        <p id="totalActivities" class="text-2xl font-bold text-orange-600">0</p>
+                        <p class="text-sm text-gray-600">Attività</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-purple-50 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-3">
+                            <i class="fas fa-calendar-day text-purple-600"></i>
+                        </div>
+                        <p id="dailyAverage" class="text-2xl font-bold text-purple-600">0h</p>
+                        <p class="text-sm text-gray-600">Media Giornaliera</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Detailed Table -->
+            <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <i class="fas fa-table text-harvest-primary mr-2"></i>
+                        Dettaglio Completo Clienti
+                    </h3>
+                    <p class="text-sm text-gray-600 mt-1">Ordinato per ore decrescenti</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ore</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentuale</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Attività</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Export Section -->
+            <section class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-download text-harvest-primary mr-2"></i>
+                            Esporta e Condividi
+                        </h3>
+                        <p class="text-sm text-gray-600 mt-1">Salva l'analisi o condividila con il team</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+                        <button onclick="window.print()" class="bg-harvest-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
+                            <i class="fas fa-print mr-2"></i>
+                            Stampa Report
+                        </button>
+                        <button id="shareBtn" class="bg-white text-harvest-primary border border-harvest-primary px-4 py-2 rounded-lg hover:bg-blue-50 transition-colors flex items-center justify-center">
+                            <i class="fas fa-share mr-2"></i>
+                            Condividi URL
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+        
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <div class="flex justify-center items-center space-x-2 mb-4">
+                    <div class="bg-harvest-primary text-white rounded p-1">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <span class="font-medium text-gray-900">Harvest Time Tracking Analyzer</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">
+                    Analisi automatica dei costi operativi • Privacy-first design • Open Source
+                </p>
+                <div class="flex justify-center space-x-6 text-xs text-gray-400">
+                    <span><i class="fas fa-shield-alt mr-1"></i>100% Client-side</span>
+                    <span><i class="fas fa-lock mr-1"></i>Zero tracking</span>
+                    <span><i class="fas fa-mobile-alt mr-1"></i>Mobile friendly</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" class="fixed top-20 right-4 z-50 space-y-2"></div>
+
+    <!-- Scripts -->
+    <script src="js/harvest-analyzer.js"></script>
+    
+</body>
+</html>
